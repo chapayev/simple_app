@@ -1,5 +1,8 @@
 SampleApp::Application.routes.draw do
+  get "sessions/new"
+
   resources :users
+  resources :sessions, :only => [:new, :create, :destroy]
 #  get "users/new"
 #  get "pages/home"
 #  get "pages/contact"

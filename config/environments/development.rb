@@ -22,5 +22,10 @@ SampleApp::Application.configure do
 
   # Only use best-standards-support built into browsers
   config.action_dispatch.best_standards_support = :builtin
+  #ssl enable
+  #config.middleware.insert_before ActionDispatch::Static, "Rack::SSL"
+  #enable ssl if request ssl
+  config.middleware.insert_before ActionDispatch::Static, Rack::SSL, :exclude => proc { |env| env['HTTPS'] != 'on' }
+
 end
 

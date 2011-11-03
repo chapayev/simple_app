@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
-  before_filter :authenticate, :only => [:index, :edit, :update, :destroy]
-  before_filter :correct_user, :only => [:edit, :update]
+  before_filter :authenticate, :only => [ :index, :edit, :update, :destroy]
+  before_filter :correct_user, :only => [ :edit, :update]
   before_filter :admin_user,   :only => :destroy
 
   attr_accessor :name, :email
@@ -17,11 +17,18 @@ class UsersController < ApplicationController
   end
 
   def new
-	@title = "Sign up"
-	@user = User.new
+	if signed_in?
+		redirect_to(root_path)
+	else
+		@title = "Sign up"
+		@user = User.new
+	end
   end
 
   def create
+  if signed_in?
+    redirect_to(root_path)
+  else
     @user = User.new(params[:user])
     if @user.save
       sign_in @user
@@ -33,6 +40,7 @@ class UsersController < ApplicationController
       @user.password_confirmation = ""
       render 'new'
     end
+  end
   end
 
   def edit
@@ -52,9 +60,14 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    User.find(params[:id]).destroy
-    flash[:success] = "User destroyed."
-    redirect_to users_path
+    if  params[:id] != "#{current_user.id}"
+      User.find(params[:id]).destroy
+      flash[:success] = "User destroyed."
+      redirect_to users_path
+    else
+      flash[:error] = "You cant destroy yourself."
+      redirect_to users_path
+    end
   end
   private
 

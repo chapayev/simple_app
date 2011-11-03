@@ -16,8 +16,8 @@ namespace :db do
                    :password_confirmation => password)
     end
 
-    admin = User.create!(:name => "Example User",
-                         :email => "aexample@railstutorial.org",
+    admin = User.create!(:name => "Admin User",
+                         :email => "admin@example.org",
                          :password => "foobar",
                          :password_confirmation => "foobar")
     admin.toggle!(:admin)

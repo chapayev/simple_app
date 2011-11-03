@@ -227,6 +227,42 @@ describe "for signed-in users" do
   end
 
   describe "GET 'index'" do
+    describe "for signed-in admins" do
+      before(:each) do
+        admin = Factory(:user, :email => "admin@example.com", :admin => true)
+        test_sign_in(admin)
+        second = Factory(:user, :name => "Bob", :email => "another@example.com")
+        third  = Factory(:user, :name => "Ben", :email => "another@example.net")
+
+        @users = [@admin, second, third]
+        30.times do
+          @users << Factory(:user, :email => Factory.next(:email))
+        end  
+      end
+      it "should be successful" do
+        get :index    
+        response.should be_success
+      end
+      it "should have the right title" do
+        get :index    
+        response.should have_selector("title", :content => "All users")
+      end
+      it "should paginate users" do
+        get :index    
+        response.should have_selector("div.pagination")
+        response.should have_selector("span.disabled", :content => "Previous")
+        response.should have_selector("a", :href => "/users?page=2",
+                                           :content => "2")
+        response.should have_selector("a", :href => "/users?page=2",
+                                           :content => "Next")
+      end
+      it "should have delete for each user" do
+        get :index
+        @users[1..2].each do |user|
+             response.should have_selector("a", :title=> "Delete #{user.name}", :content => "delete")
+        end
+      end
+    end
 
     describe "for non-signed-in users" do
       it "should deny access" do
@@ -316,6 +352,11 @@ describe "DELETE 'destroy'" do
         delete :destroy, :id => @user
         response.should redirect_to(users_path)
       end
+#      it "should redirect to the root page if try to destroy yourself" do
+#        delete :destroy, :id => @admin.id
+#        response.should redirect_to(root_path)
+#      end
+
     end
   end
 end
